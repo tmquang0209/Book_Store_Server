@@ -5,7 +5,7 @@ const generateToken = (payload, time = "1h") => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: time,
     });
-    return payload;
+    return token;
 };
 
 // decode token
