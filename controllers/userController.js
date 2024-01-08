@@ -3,29 +3,24 @@ const userModel = require("../models/user");
 const jwt = require("../Utils/jwtToken");
 const bcrypt = require("../Utils/bcrypt");
 const jsonFormat = require("../Utils/json");
+const { validationResult } = require("express-validator");
 
 const userController = {
     getAllUsers: async (req, res) => {
         try {
             // auth from header
             const { authorization } = req.headers;
-            const decodeAuth = jwt.decode(authorization);
 
             //check permission
-            if (decodeAuth.data.role !== "admin") {
-                const result = jsonFormat(false, "Permission denied", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
+            jwt.checkPermission(res, authorization, "admin");
 
             await connectDb();
             const users = await userModel.find();
 
             //encrypt json using jwt
             const result = users.length === 0 ? jsonFormat(false, "No users found", null) : jsonFormat(true, "Users found", users);
-            const decode = jwt(result);
 
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Error", err));
@@ -34,14 +29,27 @@ const userController = {
 
     getUserById: async (req, res) => {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
+            // auth from header
+            const { authorization } = req.headers;
+
+            //check permission
+            // if not admin or req.username != token
+            // jwt.checkPermission(res, authorization, "admin");
+
             await connectDb();
             const { user_id } = req.params;
             const user = await userModel.findOne({ user_id });
 
             const result = user ? jsonFormat(true, "User found", user) : jsonFormat(false, "User not found", null);
-            const decode = jwt.generateToken(result);
 
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             res.json(err);
         }
@@ -51,36 +59,29 @@ const userController = {
     createUser: async (req, res) => {
         console.log("Create user");
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
             // auth from header
             const { authorization } = req.headers;
-            const decodeAuth = jwt.decode(authorization);
 
             //check permission
-            if (decodeAuth.data.role !== "admin") {
-                const result = jsonFormat(false, "Permission denied", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
+            jwt.checkPermission(res, authorization, "admin");
 
             await connectDb();
             // check empty
             const { username, password, first_name, last_name, telephone } = req.body;
-            if (!username || !password || !first_name || !last_name || !telephone) {
-                const missingUsername = !username ? "username" : "";
-                const missingPassword = !password ? "password" : "";
-                const missingFirstName = !first_name ? "first_name" : "";
-                const missingLastName = !last_name ? "last_name" : "";
-                const missingTelephone = !telephone ? "telephone" : "";
-                const result = jsonFormat(false, `Please fill ${missingUsername} ${missingPassword} ${missingFirstName} ${missingLastName} ${missingTelephone}`, null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
+
             // check exists
             const check = await userModel.findOne({ username });
             if (check) {
                 const result = jsonFormat(false, "Username already exists", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+
+                return res.json(result);
             }
             // create user
             // encrypt password using bcrypt
@@ -90,8 +91,8 @@ const userController = {
             const user = await userModel.create(req.body);
 
             const result = jsonFormat(true, "User created", user);
-            const decode = jwt.generateToken(result);
-            return res.json(decode);
+
+            return res.json(result);
         } catch (err) {
             res.json(err);
         }
@@ -99,14 +100,26 @@ const userController = {
 
     updateUser: async (req, res) => {
         try {
-            await connectDb();
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
+            // auth from header
+            const { authorization } = req.headers;
+
             const { user_id, first_name, last_name, telephone } = req.body;
+            jwt.checkValidValue(res, authorization, user_id);
+
+            await connectDb();
             const user = await userModel.findOneAndUpdate({ user_id }, { first_name, last_name, telephone }, { new: true });
 
             if (!user) {
                 const result = jsonFormat(false, "User not found", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+
+                return res.json(result);
             }
 
             res.json(jwt.generateToken(jsonFormat(true, "User updated", user)));
@@ -118,16 +131,18 @@ const userController = {
     //admin
     deleteUser: async (req, res) => {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
             // auth from header
             const { authorization } = req.headers;
-            const decodeAuth = jwt.decode(authorization);
 
             //check permission
-            if (decodeAuth.data.role !== "admin") {
-                const result = jsonFormat(false, "Permission denied", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
+            jwt.checkPermission(res, authorization, "admin");
 
             await connectDb();
             const { user_id } = req.body;
@@ -136,8 +151,8 @@ const userController = {
             });
 
             const result = user ? jsonFormat(true, "User deleted", user) : jsonFormat(false, "User not found", null);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+
+            res.json(result);
         } catch (err) {
             res.json(err);
         }
@@ -153,29 +168,26 @@ const userController = {
             //check permission
             if (decodeAuth.data.role !== "admin") {
                 const result = jsonFormat(false, "Permission denied", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+
+                return res.json(result);
             }
 
             await connectDb();
-            const { id } = req.params;
-            console.log(req.params);
-            const user = await userModel.findOne({ user_id: id });
+            const { user_id } = req.params;
+
+            const user = await userModel.findOne({ user_id });
 
             if (!user) {
                 const result = jsonFormat(false, "User not found", null);
-                console.log(result);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+                return res.json(result);
             }
 
             const status = user.status === true ? false : true;
-            const updateUser = await userModel.findOneAndUpdate({ user_id: id }, { status }, { new: true });
+            const updateUser = await userModel.findOneAndUpdate({ user_id }, { status }, { new: true });
 
             const result = jsonFormat(true, "User status updated", updateUser);
-            console.log(result);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(err);
@@ -186,31 +198,29 @@ const userController = {
         try {
             await connectDb();
             const { username, password } = req.body;
-            if (!username || !password) {
-                const missingUsername = !username ? "username" : "";
-                const missingPassword = !password ? "password" : "";
-                const result = jsonFormat(false, `Please fill ${missingUsername} ${missingPassword}`, null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
             }
 
             const user = await userModel.findOne({ username });
             if (!user) {
                 const result = jsonFormat(false, "Username not found", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+                return res.json(result);
             }
 
             const checkPassword = await bcrypt.comparePassword(password, user.password);
             if (!checkPassword) {
                 const result = jsonFormat(false, "Password incorrect", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+
+                return res.json(result);
             }
 
-            const result = jsonFormat(true, "Login success", user);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+            const result = jsonFormat(true, "Login success", { ...user._doc, token: jwt.generateToken({ ...user }) });
+
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(err);
@@ -219,24 +229,19 @@ const userController = {
 
     signup: async (req, res) => {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
             await connectDb();
             const { username, password, first_name, last_name, telephone } = req.body;
-            if (!username || !password || !first_name || !last_name || !telephone) {
-                const missingUsername = !username ? "username" : "";
-                const missingPassword = !password ? "password" : "";
-                const missingFirstName = !first_name ? "first_name" : "";
-                const missingLastName = !last_name ? "last_name" : "";
-                const missingTelephone = !telephone ? "telephone" : "";
-                const result = jsonFormat(false, `Please fill ${missingUsername} ${missingPassword} ${missingFirstName} ${missingLastName} ${missingTelephone}`, null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
 
             const check = await userModel.findOne({ username });
             if (check) {
                 const result = jsonFormat(false, "Username already exists", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+                return res.json(result);
             }
 
             const hash = await bcrypt.hashPassword(password);
@@ -245,8 +250,8 @@ const userController = {
             const user = await userModel.create(req.body);
 
             const result = jsonFormat(true, "Signup success", user);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(err);
@@ -255,24 +260,24 @@ const userController = {
 
     forgotPassword: async (req, res) => {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
             await connectDb();
             const { username } = req.body;
-            if (!username) {
-                const result = jsonFormat(false, "Please fill username", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
 
             const user = await userModel.findOne({ username });
             if (!user) {
                 const result = jsonFormat(false, "Username not found", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+                return res.json(result);
             }
 
             const result = jsonFormat(true, "User found", user);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(err);

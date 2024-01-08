@@ -2,6 +2,7 @@ const connectDb = require("../models/database");
 const categoryModel = require("../models/category");
 const jwt = require("../Utils/jwtToken");
 const jsonFormat = require("../Utils/json");
+const { validationResult } = require("express-validator");
 
 const categoryController = {
     getAllCategories: async (req, res) => {
@@ -11,9 +12,7 @@ const categoryController = {
 
             //encrypt json using jwt
             const result = categories.length === 0 ? jsonFormat(false, "No categories found", null) : jsonFormat(true, "Categories found", categories);
-            const decode = jwt.generateToken(result);
-
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Error", err));
@@ -22,14 +21,19 @@ const categoryController = {
 
     getCategoryById: async (req, res) => {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
+                return res.json(result);
+            }
+
             await connectDb();
             const { category_id } = req.params;
             const category = await categoryModel.findOne({ category_id });
 
             const result = category ? jsonFormat(true, "Category found", category) : jsonFormat(false, "Category not found", null);
-            const decode = jwt.generateToken(result);
-
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             res.json(err);
         }
@@ -38,42 +42,33 @@ const categoryController = {
     createCategory: async (req, res) => {
         console.log("Create category");
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
+                return res.json(result);
+            }
+
             // auth from header
             const { authorization } = req.headers;
-            const decodeAuth = jwt.decode(authorization);
 
             //check permission
-            if (decodeAuth.data.role !== "admin") {
-                const result = jsonFormat(false, "Permission denied", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
+            jwt.checkPermission(res, authorization, "admin");
 
             await connectDb();
             // check empty
             const { name, description } = req.body;
-            if (!name || !description) {
-                const missingName = !name ? "name" : "";
-                const missingDescription = !description ? "description" : "";
-                const result = jsonFormat(false, `Please fill ${missingName} ${missingDescription}`, null);
-                console.log(result);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
 
             // check exists
             const check = await categoryModel.findOne({ name });
             if (check) {
                 const result = jsonFormat(false, "Category already exists", null);
-
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+                return res.json(result);
             }
             // create category
             const category = await categoryModel.create({ name, description });
             const result = jsonFormat(true, "Category created", category);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Error", err));
@@ -83,38 +78,31 @@ const categoryController = {
     updateCategory: async (req, res) => {
         console.log("Update category");
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
+                return res.json(result);
+            }
+
             // auth from header
             const { authorization } = req.headers;
-            const decodeAuth = jwt.decode(authorization);
 
             //check permission
-            if (decodeAuth.data.role !== "admin") {
-                const result = jsonFormat(false, "Permission denied", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
+            jwt.checkPermission(res, authorization, "admin");
 
             await connectDb();
             const { category_id } = req.params;
             const { name, description } = req.body;
-            if (!name || !description) {
-                const missingName = !name ? "name" : "";
-                const missingDescription = !description ? "description" : "";
-                const result = jsonFormat(false, `Please fill ${missingName} ${missingDescription}`, null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
 
             const category = await categoryModel.findOneAndUpdate({ category_id }, { name, description }, { new: true });
             if (!category) {
                 const result = jsonFormat(false, "Category not found", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+                return res.json(result);
             }
 
             const result = jsonFormat(true, "Category updated", category);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Error", err));
@@ -123,29 +111,29 @@ const categoryController = {
 
     deleteCategory: async (req, res) => {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
+                return res.json(result);
+            }
+
             // auth from header
             const { authorization } = req.headers;
-            const decodeAuth = jwt.decode(authorization);
 
             //check permission
-            if (decodeAuth.data.role !== "admin") {
-                const result = jsonFormat(false, "Permission denied", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
+            jwt.checkPermission(res, authorization, "admin");
 
             const { category_id } = req.params;
             await connectDb();
             const category = await categoryModel.findOneAndDelete({ category_id });
             if (!category) {
                 const result = jsonFormat(false, "Category not found", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+                return res.json(result);
             }
 
             const result = jsonFormat(true, "Category deleted", category);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Error", err));
@@ -154,31 +142,31 @@ const categoryController = {
 
     updateStatus: async (req, res) => {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
+                return res.json(result);
+            }
+
             const { category_id } = req.params;
             // auth from header
             const { authorization } = req.headers;
-            const decodeAuth = jwt.decode(authorization);
 
             //check permission
-            if (decodeAuth.data.role !== "admin") {
-                const result = jsonFormat(false, "Permission denied", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
-            }
+            jwt.checkPermission(res, authorization, "admin");
 
             await connectDb();
             const category = await categoryModel.findOne({ category_id });
             if (!category) {
                 const result = jsonFormat(false, "Category not found", null);
-                const decode = jwt.generateToken(result);
-                return res.json(decode);
+                return res.json(result);
             }
 
             const status = category.status === true ? false : true;
             const updateCategory = await categoryModel.findOneAndUpdate({ category_id }, { status }, { new: true });
             const result = jsonFormat(true, "Category updated", updateCategory);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Error", err));
@@ -187,12 +175,18 @@ const categoryController = {
 
     searchByName: async (req, res) => {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
+                return res.json(result);
+            }
+
             const { name } = req.params;
             await connectDb();
             const categories = await categoryModel.find({ name: { $regex: name, $options: "i" } });
             const result = categories.length === 0 ? jsonFormat(false, "No categories found", null) : jsonFormat(true, "Categories found", categories);
-            const decode = jwt.generateToken(result);
-            res.json(decode);
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Error", err));
