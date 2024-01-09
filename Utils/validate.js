@@ -75,8 +75,6 @@ const bannerValidate = {
         check("name", "name is required").not().isEmpty(),
         check("image", "image is required").not().isEmpty(),
         check("link", "link is required").not().isEmpty(),
-        check("order", "order is required").not().isEmpty(),
-        check("order", "order must be a number").isNumeric(),
     ],
     updateBanner: [
         check("banner_id", "banner_id is required").not().isEmpty(),
@@ -84,8 +82,6 @@ const bannerValidate = {
         check("name", "name is required").not().isEmpty(),
         check("image", "image is required").not().isEmpty(),
         check("link", "link is required").not().isEmpty(),
-        check("order", "order is required").not().isEmpty(),
-        check("order", "order must be a number").isNumeric(),
     ],
 
     deleteBanner: [check("banner_id", "banner_id is required").not().isEmpty(), check("banner_id", "banner_id must be a number").isNumeric()],

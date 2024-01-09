@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const connectDb = require("../models/database");
 const bannerModel = require("../models/banner");
 const jsonFormat = require("../Utils/json");
+const jwt = require("../Utils/jwtToken");
 
 const bannerController = {
     getAllBanner: async (req, res) => {
@@ -49,6 +50,12 @@ const bannerController = {
                 return res.json(result);
             }
 
+            // auth from header
+            const { authorization } = req.headers;
+
+            //check permission
+            jwt.checkPermission(res, authorization, "admin");
+
             await connectDb();
             const banner = await bannerModel.create(req.body);
 
@@ -63,6 +70,12 @@ const bannerController = {
     updateBanner: async (req, res) => {
         try {
             const errors = validationResult(req);
+
+            // auth from header
+            const { authorization } = req.headers;
+
+            //check permission
+            jwt.checkPermission(res, authorization, "admin");
 
             if (!errors.isEmpty()) {
                 const result = jsonFormat(false, "Error", errors.array());
@@ -92,6 +105,12 @@ const bannerController = {
                 return res.json(result);
             }
 
+            // auth from header
+            const { authorization } = req.headers;
+
+            //check permission
+            jwt.checkPermission(res, authorization, "admin");
+
             const { banner_id } = req.params;
 
             await connectDb();
@@ -114,6 +133,12 @@ const bannerController = {
                 const result = jsonFormat(false, "Error", errors.array());
                 return res.json(result);
             }
+
+            // auth from header
+            const { authorization } = req.headers;
+
+            //check permission
+            jwt.checkPermission(res, authorization, "admin");
 
             const { banner_id } = req.params;
 

@@ -9,6 +9,12 @@ const bannerSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    description: {
+        type: String,
+    },
+    author: {
+        type: String,
+    },
     image: String,
     link: String,
     status: {
