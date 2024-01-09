@@ -3,6 +3,7 @@ const categoryModel = require("../models/category");
 const productModel = require("../models/product");
 const jwt = require("../Utils/jwtToken");
 const jsonFormat = require("../Utils/json");
+const { validationResult } = require("express-validator");
 
 const productController = {
     getAllProducts: async (req, res) => {
@@ -219,6 +220,48 @@ const productController = {
             await connectDb();
             const { name } = req.params;
             const products = await productModel.find({ name: { $regex: name, $options: "i" } });
+
+            const result = products.length === 0 ? jsonFormat(false, "No products found", null) : jsonFormat(true, "Products found", products);
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.json(jsonFormat(false, "Error", err));
+        }
+    },
+
+    getProductByCategory: async (req, res) => {
+        try {
+            await connectDb();
+            const { category_id } = req.params;
+            const products = await productModel.find({ category_id });
+
+            const result = products.length === 0 ? jsonFormat(false, "No products found", null) : jsonFormat(true, "Products found", products);
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.json(jsonFormat(false, "Error", err));
+        }
+    },
+
+    getTrendingProducts: async (req, res) => {
+        console.log("get trending products");
+        try {
+            await connectDb();
+            const products = await productModel.find().limit(5);
+
+            const result = products.length === 0 ? jsonFormat(false, "No products found", null) : jsonFormat(true, "Products found", products);
+            console.log(result);
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.json(jsonFormat(false, "Error", err));
+        }
+    },
+
+    getTopSellerProducts: async (req, res) => {
+        try {
+            await connectDb();
+            const products = await productModel.find().sort({ order: 1 }).limit(5);
 
             const result = products.length === 0 ? jsonFormat(false, "No products found", null) : jsonFormat(true, "Products found", products);
             res.json(result);
