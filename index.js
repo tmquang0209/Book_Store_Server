@@ -20,6 +20,6 @@ app.use("/order/", orderRouter);
 app.use("/review/", reviewRouter);
 app.use("/banner/", bannerRouter);
 
-app.listen(process.env.PORT || 3000, () => {
+app.listen(process.env.PORT || 3001, () => {
     console.log("listening on *:3000");
 });

@@ -6,6 +6,18 @@ const jsonFormat = require("../Utils/json");
 const { validationResult } = require("express-validator");
 
 const userController = {
+    getUserByToken: async (req, res) => {
+        try {
+            const { authorization } = req.headers;
+            const decodeAuth = jwt.decode(authorization);
+            console.log(decodeAuth);
+            return res.json(jsonFormat(true, "User found", { ...decodeAuth._doc, token: jwt.generateToken({ ...decodeAuth._doc }) }));
+        } catch (err) {
+            console.error(err);
+            res.json(jsonFormat(false, "Token is expired", null));
+        }
+    },
+
     getAllUsers: async (req, res) => {
         try {
             // auth from header

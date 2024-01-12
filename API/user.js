@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const userController = require("../controllers/userController");
 const validate = require("../Utils/validate");
 
+userRouter.get("/getUserByToken", userController.getUserByToken);
 userRouter.get("/getAllUsers", userController.getAllUsers);
 userRouter.get("/getUserById/:id", userController.getUserById);
 userRouter.post("/createUser", userController.createUser);
