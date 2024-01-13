@@ -10,8 +10,17 @@ const userController = {
         try {
             const { authorization } = req.headers;
             const decodeAuth = jwt.decode(authorization);
-            console.log(decodeAuth);
-            return res.json(jsonFormat(true, "User found", { ...decodeAuth, token: jwt.generateToken({ ...decodeAuth._doc }) }));
+
+            await connectDb();
+            const user = await userModel.findOne({ user_id: decodeAuth.data.user_id });
+
+            if (!user) {
+                const result = jsonFormat(false, "User not found", null);
+                return res.json(result);
+            }
+
+            const result = jsonFormat(true, "User found", { user, token: jwt.generateToken({ ...user }) });
+            res.json(result);
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Token is expired", null));
