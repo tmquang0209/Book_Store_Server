@@ -11,7 +11,7 @@ const userController = {
             const { authorization } = req.headers;
             const decodeAuth = jwt.decode(authorization);
             console.log(decodeAuth);
-            return res.json(jsonFormat(true, "User found", { ...decodeAuth._doc, token: jwt.generateToken({ ...decodeAuth._doc }) }));
+            return res.json(jsonFormat(true, "User found", { ...decodeAuth, token: jwt.generateToken({ ...decodeAuth._doc }) }));
         } catch (err) {
             console.error(err);
             res.json(jsonFormat(false, "Token is expired", null));
