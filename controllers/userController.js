@@ -12,7 +12,7 @@ const userController = {
             const decodeAuth = jwt.decode(authorization);
 
             await connectDb();
-            console.log(decodeAuth._doc.user_id);
+            console.log(decodeAuth);
             const user = await userModel.findOne({ user_id: decodeAuth._doc.user_id });
 
             if (!user) {
@@ -20,7 +20,7 @@ const userController = {
                 return res.json(result);
             }
 
-            const result = jsonFormat(true, "User found", { ...user._doc, token: jwt.generateToken({ user }) });
+            const result = jsonFormat(true, "User found", { ...user._doc, token: jwt.generateToken({ ...user }) });
             res.json(result);
         } catch (err) {
             console.error(err);

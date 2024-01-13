@@ -250,7 +250,7 @@ const productController = {
             const products = await productModel.find().limit(5);
 
             const result = products.length === 0 ? jsonFormat(false, "No products found", null) : jsonFormat(true, "Products found", products);
-            console.log(result);
+
             res.json(result);
         } catch (err) {
             console.error(err);
