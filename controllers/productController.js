@@ -92,6 +92,7 @@ const productController = {
                 product_id: product.product_id,
                 name: product.name,
                 description: product.description,
+                quantity: product.quantity,
                 price: product.price,
                 thumbnail: product.thumbnail,
                 images: product.images,
