@@ -9,7 +9,7 @@ const productController = {
     getAllProducts: async (req, res) => {
         try {
             const { keyword, category, sort, from, to } = req.query || req.params;
-            
+
             await connectDb();
             let products = await productModel.find();
 
@@ -69,6 +69,7 @@ const productController = {
     },
 
     getProductById: async (req, res) => {
+        console.log("Get product by id");
         try {
             const errors = validationResult(req);
 
@@ -81,10 +82,19 @@ const productController = {
             const { product_id } = req.params;
             const product = await productModel.findOne({ product_id });
 
-            const result = product ? jsonFormat(true, "Product found", product) : jsonFormat(false, "Product not found", null);
+            const avgRating = product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length;
+            const reviews = { totalReview: product.reviews.length, avgRating };
+
+            // format product
+            const formatProduct = {
+                ...product._doc,
+                reviews: reviews,
+            };
+
+            const result = product ? jsonFormat(true, "Product found", formatProduct) : jsonFormat(false, "Product not found", null);
             res.json(result);
         } catch (err) {
-            res.json(err);
+            res.json(jsonFormat(false, "Error", null));
         }
     },
 
