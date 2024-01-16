@@ -82,13 +82,22 @@ const productController = {
             const { product_id } = req.params;
             const product = await productModel.findOne({ product_id });
 
+            const category = await categoryModel.findOne({ category_id: product.category_id });
+
             const avgRating = product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length;
             const reviews = { totalReview: product.reviews.length, avgRating };
 
             // format product
             const formatProduct = {
-                ...product._doc,
+                product_id: product.product_id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                thumbnail: product.thumbnail,
+                images: product.images,
                 reviews: reviews,
+                category,
+                createdAt: product.createdAt,
             };
 
             const result = product ? jsonFormat(true, "Product found", formatProduct) : jsonFormat(false, "Product not found", null);
