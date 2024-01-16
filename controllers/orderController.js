@@ -43,7 +43,7 @@ const orderController = {
 
             // check quantity
             const productsQuantity = products.map((product) => product.quantity);
-            const productsDbQuantity = productsDb.map((product) => product.quantity);
+            const productsDbQuantity = productsDb.map((product) => product.quantity.inStock);
             const checkQuantity = productsQuantity.every((quantity, index) => quantity <= productsDbQuantity[index]);
             if (!checkQuantity) {
                 const result = jsonFormat(false, "Quantity not enough", null);

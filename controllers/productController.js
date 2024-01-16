@@ -8,10 +8,58 @@ const { validationResult } = require("express-validator");
 const productController = {
     getAllProducts: async (req, res) => {
         try {
+            const { keyword, category, sort, from, to } = req.query || req.params;
+            
             await connectDb();
-            const products = await productModel.find();
+            let products = await productModel.find();
 
-            //encrypt json using jwt
+            if (keyword) {
+                products = products.filter((product) => product.name.toLowerCase().includes(keyword.toLowerCase()));
+            }
+
+            if (category) {
+                products = products.filter((product) => product.category_id === Number(category));
+            }
+
+            if (sort) {
+                switch (sort) {
+                    case "best-selling":
+                        products = products.sort((a, b) => a.quantity.sold - b.quantity.sold);
+                        break;
+                    case "featured":
+                        products = products.sort((a, b) => a.quantity.sold - b.quantity.sold);
+                        break;
+                    case "newest":
+                        products = products.sort((a, b) => a.createdAt - b.createdAt);
+                        break;
+                    case "oldest":
+                        products = products.sort((a, b) => b.createdAt - a.createdAt);
+                        break;
+                    case "a-z":
+                        products = products.sort((a, b) => a.name.localeCompare(b.name));
+                        break;
+                    case "z-a":
+                        products = products.sort((a, b) => b.name.localeCompare(a.name));
+                        break;
+                    case "low-high":
+                        products = products.sort((a, b) => a.price - b.price);
+                        break;
+                    case "high-low":
+                        products = products.sort((a, b) => b.price - a.price);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (from) {
+                products = products.filter((product) => product.price >= from);
+            }
+
+            if (to) {
+                products = products.filter((product) => product.price <= to);
+            }
+
             const result = products.length === 0 ? jsonFormat(false, "No products found", null) : jsonFormat(true, "Products found", products);
             res.json(result);
         } catch (err) {
@@ -50,7 +98,7 @@ const productController = {
                 return res.json(result);
             }
 
-            const { name, description, price, category_id } = req.body;
+            const { name, description, price, category_id, quantity } = req.body;
             // auth from header
             const { authorization } = req.headers;
 
@@ -87,6 +135,9 @@ const productController = {
                 description,
                 price,
                 category_id,
+                quantity: {
+                    inStock: quantity,
+                },
             });
 
             await newProduct.save();
