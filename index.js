@@ -9,7 +9,6 @@ const productRouter = require("./API/product");
 const orderRouter = require("./API/order");
 const reviewRouter = require("./API/review");
 const bannerRouter = require("./API/banner");
-const provincesRouter = require("./API/provinces");
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -20,7 +19,6 @@ app.use("/product/", productRouter);
 app.use("/order/", orderRouter);
 app.use("/review/", reviewRouter);
 app.use("/banner/", bannerRouter);
-app.use("/provinces/", provincesRouter);
 
 app.listen(process.env.PORT || 3001, () => {
     console.log("listening on *:3000");
