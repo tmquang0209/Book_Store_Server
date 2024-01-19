@@ -23,7 +23,7 @@ const orderSchema = new mongoose.Schema({
         },
         email: {
             type: String,
-            required: true,
+            required: false,
         },
     },
 
@@ -32,11 +32,15 @@ const orderSchema = new mongoose.Schema({
             type: String,
             required: true,
         },
-        city: {
+        province: {
             type: String,
             required: true,
         },
-        state: {
+        district: {
+            type: String,
+            required: true,
+        },
+        ward: {
             type: String,
             required: true,
         },
@@ -58,6 +62,12 @@ const orderSchema = new mongoose.Schema({
             },
         },
     ],
+
+    payment: {
+        type: String,
+        required: true,
+        default: "cash",
+    },
 
     status: {
         type: String,

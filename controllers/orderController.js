@@ -1,10 +1,10 @@
 const orderModel = require("../models/order");
 const productModel = require("../models/product");
-const userModel = require("../models/user");
 
 const connectDb = require("../models/database");
 const jwt = require("../Utils/jwtToken");
 const jsonFormat = require("../Utils/json");
+const { validationResult } = require("express-validator");
 
 const orderController = {
     createOrder: async (req, res) => {
@@ -14,23 +14,14 @@ const orderController = {
 
             await connectDb();
             // check empty
-            if (!contact || !address || !products) {
-                // const missingUserId = !user_id ? "user_id" : "";
-                const missingUserId = "";
-                const missingContact = !contact ? "contact" : "";
-                const missingAddress = !address ? "address" : "";
-                const missingProducts = !products ? "products" : "";
-                const missing = `${missingUserId} ${missingContact} ${missingAddress} ${missingProducts}`;
-                const result = jsonFormat(false, `Missing ${missing}`, null);
+            const errors = validationResult(req);
 
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
                 return res.json(result);
             }
 
-            // check user_id
-            // if (user_id) {
-            //     const result = jsonFormat(false, "User not found", null);
-            //     return res.json(result);
-            // }
+            jwt.checkPermission(res, authorization, "admin");
 
             // check products
             const productsId = products.map((product) => product.product_id);
@@ -72,13 +63,15 @@ const orderController = {
             const { order_id } = req.params;
             const { authorization } = req.headers;
 
-            await connectDb();
             // check empty
-            if (!order_id) {
-                const result = jsonFormat(false, "Missing order_id", null);
+            const errors = validationResult(req);
 
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
                 return res.json(result);
             }
+
+            await connectDb();
 
             // check order_id
             const order = await orderModel.findOne({ order_id });
@@ -122,14 +115,17 @@ const orderController = {
             const { authorization } = req.headers;
             const { user_id } = req.params;
 
+            // check empty
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
+                return res.json(result);
+            }
+
             jwt.checkValidValue(res, authorization, user_id);
 
             await connectDb();
-            // check empty
-            if (!user_id) {
-                const result = jsonFormat(false, "Missing user_id", null);
-                return res.json(result);
-            }
 
             // check user_id
             const orders = await orderModel.find({ user_id });
@@ -154,15 +150,15 @@ const orderController = {
             // check permission
             jwt.checkPermission(res, authorization, "admin");
 
-            await connectDb();
             // check empty
-            if (!order_id || !status) {
-                const missingOrderId = !order_id ? "order_id" : "";
-                const missingStatus = !status ? "status" : "";
-                const missing = `${missingOrderId} ${missingStatus}`;
-                const result = jsonFormat(false, `Missing ${missing}`, null);
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
                 return res.json(result);
             }
+
+            await connectDb();
 
             // check order_id
             const order = await orderModel.findOne({ order_id });

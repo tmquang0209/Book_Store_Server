@@ -71,11 +71,7 @@ const productValidate = {
 
 const bannerValidate = {
     bannerById: [check("banner_id", "banner_id is required").not().isEmpty(), check("banner_id", "banner_id must be a number").isNumeric()],
-    createBanner: [
-        check("name", "name is required").not().isEmpty(),
-        check("image", "image is required").not().isEmpty(),
-        check("link", "link is required").not().isEmpty(),
-    ],
+    createBanner: [check("name", "name is required").not().isEmpty(), check("image", "image is required").not().isEmpty(), check("link", "link is required").not().isEmpty()],
     updateBanner: [
         check("banner_id", "banner_id is required").not().isEmpty(),
         check("banner_id", "banner_id must be a number").isNumeric(),
@@ -88,11 +84,29 @@ const bannerValidate = {
     updateStatusBanner: [check("banner_id", "banner_id is required").not().isEmpty(), check("banner_id", "banner_id must be a number").isNumeric()],
 };
 
+const orderValidate = {
+    createOrder: [
+        check("contact", "contact is required").not().isEmpty(),
+        check("contact.full_name", "contact.full_name is required").not().isEmpty(),
+        check("contact.phone_number", "contact.phone_number is required").not().isEmpty(),
+        check("address", "address is required").not().isEmpty(),
+        check("address.address", "address.address is required").not().isEmpty(),
+        check("address.province", "address.province is required").not().isEmpty(),
+        check("address.district", "address.district is required").not().isEmpty(),
+        check("address.ward", "address.ward is required").not().isEmpty(),
+        check("products", "products is required").not().isEmpty(),
+        check("products", "products must be an array").isArray(),
+        check("payment", "payment is required").not().isEmpty(),
+    ],
+    getOrder: [check("order_id", "order_id is required").not().isEmpty(), check("order_id", "order_id must be a number").isNumeric()],
+};
+
 const validate = {
     ...userValidate,
     ...categoryValidate,
     ...productValidate,
     ...bannerValidate,
+    ...orderValidate,
 };
 
 module.exports = validate;

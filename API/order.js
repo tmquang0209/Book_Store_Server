@@ -1,12 +1,12 @@
 const orderRouter = require("express").Router();
-const { validate } = require("../Utils/validate");
+const validate = require("../Utils/validate");
 
 const orderController = require("../controllers/orderController");
 
 orderRouter.get("/", orderController.getAllOrders);
-orderRouter.get("/:order_id", orderController.getOrder);
+orderRouter.get("/:order_id/detail", validate.getOrder, orderController.getOrder);
 orderRouter.get("/user/:user_id", orderController.getAllOrdersByUserId);
-orderRouter.post("/create", orderController.createOrder);
+orderRouter.post("/create", validate.createOrder, orderController.createOrder);
 // orderRouter.put("/update/:order_id", orderController.updateOrder);
 // orderRouter.delete("/delete/:order_id", orderController.deleteOrder);
 orderRouter.get("/updateStatus/:order_id", orderController.updateStatus);
