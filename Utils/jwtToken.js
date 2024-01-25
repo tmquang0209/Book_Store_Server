@@ -28,7 +28,7 @@ const checkLogin = (res, token) => {
 
 const checkValidValue = (res, token, userId) => {
     const decodeToken = decode(token);
-    if (decodeToken._doc.user_id !== userId) {
+    if (decodeToken._doc.user_id !== Number(userId)) {
         res.status(401).json(jsonFormat(false, "Permission denied", null));
         return false;
     }

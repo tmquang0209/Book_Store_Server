@@ -25,7 +25,7 @@ const orderController = {
             jwt.checkPermission(res, authorization, "admin");
 
             // check user_id
-            const user_id = jwt.decode(authorization).user_id;
+            const user_id = jwt.decode(authorization)._doc.user_id;
             const user = await userModel.findOne({ user_id });
 
             if (!user) {
@@ -150,7 +150,7 @@ const orderController = {
             const result = jsonFormat(true, "Get orders successfully", orders);
             res.json(result);
         } catch (err) {
-            res.json(jwt.generateToken(jsonFormat(false, err, null)));
+            res.json(jsonFormat(false, err, null));
         }
     },
 
