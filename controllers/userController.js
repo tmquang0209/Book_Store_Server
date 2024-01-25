@@ -132,11 +132,11 @@ const userController = {
             // auth from header
             const { authorization } = req.headers;
 
-            const { user_id, first_name, last_name, telephone } = req.body;
+            const { user_id, first_name, last_name, telephone, email, birthday, gender } = req.body;
             jwt.checkValidValue(res, authorization, user_id);
 
             await connectDb();
-            const user = await userModel.findOneAndUpdate({ user_id }, { first_name, last_name, telephone }, { new: true });
+            const user = await userModel.findOneAndUpdate({ user_id }, { first_name, last_name, telephone, email, birthday, gender }, { new: true });
 
             if (!user) {
                 const result = jsonFormat(false, "User not found", null);

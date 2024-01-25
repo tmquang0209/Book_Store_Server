@@ -26,6 +26,21 @@ const userSchema = new mongoose.Schema({
         require: true,
     },
 
+    email: {
+        type: String,
+        require: false,
+    },
+
+    birthday: {
+        type: Date,
+        require: false,
+    },
+
+    gender: {
+        type: String,
+        require: false,
+    },
+
     telephone: {
         type: String,
         require: true,

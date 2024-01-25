@@ -5,11 +5,12 @@ const connectDb = require("../models/database");
 const jwt = require("../Utils/jwtToken");
 const jsonFormat = require("../Utils/json");
 const { validationResult } = require("express-validator");
+const userModel = require("../models/user");
 
 const orderController = {
     createOrder: async (req, res) => {
         try {
-            const { user_id, contact, address, products } = req.body;
+            const { contact, address, products } = req.body;
             const { authorization } = req.headers;
 
             await connectDb();
@@ -22,6 +23,15 @@ const orderController = {
             }
 
             jwt.checkPermission(res, authorization, "admin");
+
+            // check user_id
+            const user_id = jwt.decode(authorization).user_id;
+            const user = await userModel.findOne({ user_id });
+
+            if (!user) {
+                const result = jsonFormat(false, "User not found", null);
+                return res.json(result);
+            }
 
             // check products
             const productsId = products.map((product) => product.product_id);
