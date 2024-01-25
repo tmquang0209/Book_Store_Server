@@ -146,7 +146,7 @@ const userController = {
                 return res.json(result);
             }
 
-            res.json(jsonFormat(true, "User updated", user));
+            res.json(jsonFormat(true, "User updated", { ...user._doc, token: jwt.generateToken({ ...user }) }));
         } catch (err) {
             res.json(err);
         }
