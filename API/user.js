@@ -7,7 +7,7 @@ userRouter.get("/getUserByToken", userController.getUserByToken);
 userRouter.get("/getAllUsers", userController.getAllUsers);
 userRouter.get("/getUserById/:id", userController.getUserById);
 userRouter.post("/createUser", userController.createUser);
-userRouter.put("/updateUserById/:id", userController.updateUser);
+userRouter.put("/updateUserById", validate.updateUser, userController.updateUser);
 userRouter.delete("/deleteUserById", userController.deleteUser);
 userRouter.get("/updateStatus/:user_id", userController.updateStatus);
 userRouter.post("/login", validate.loginUser, userController.login);

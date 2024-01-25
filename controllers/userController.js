@@ -120,6 +120,7 @@ const userController = {
     },
 
     updateUser: async (req, res) => {
+        console.log("Update user");
         try {
             const errors = validationResult(req);
 
@@ -132,8 +133,8 @@ const userController = {
             const { authorization } = req.headers;
             const { user_id, first_name, last_name, telephone, email, birthday, gender } = req.body;
 
-            const result = jwt.checkValidValue(res, authorization, user_id);
-            if (!result) {
+            const resultAuth = jwt.checkValidValue(res, authorization, user_id);
+            if (!resultAuth) {
                 return;
             }
 

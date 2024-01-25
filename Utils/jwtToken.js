@@ -32,6 +32,7 @@ const checkValidValue = (res, token, userId) => {
         res.status(401).json(jsonFormat(false, "Permission denied", null));
         return false;
     }
+    return true;
 };
 
 module.exports = { generateToken, decode, checkPermission, checkLogin, checkValidValue };
