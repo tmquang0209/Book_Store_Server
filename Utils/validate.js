@@ -29,6 +29,10 @@ const userValidate = {
         check("first_name", "First name is required").not().isEmpty(),
         check("last_name", "Last name is required").not().isEmpty(),
         check("telephone", "Telephone is required").not().isEmpty(),
+        check("email", "Email is required").not().isEmpty(),
+        check("email", "Email is invalid").isEmail(),
+        check("birthday", "Birthday is required").not().isEmpty(),
+        check("gender", "Gender is required").not().isEmpty(),
     ],
 
     deleteUser: [check("user_id", "user_id is required").not().isEmpty(), check("user_id", "user_id must be a number").isNumeric()],
