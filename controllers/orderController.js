@@ -133,7 +133,10 @@ const orderController = {
                 return res.json(result);
             }
 
-            jwt.checkValidValue(res, authorization, user_id);
+            const resultAuth = jwt.checkValidValue(res, authorization, user_id);
+            if (!resultAuth) {
+                return;
+            }
 
             await connectDb();
 

@@ -12,7 +12,6 @@ const userController = {
             const decodeAuth = jwt.decode(authorization);
 
             await connectDb();
-            console.log(decodeAuth);
             const user = await userModel.findOne({ user_id: decodeAuth._doc.user_id });
 
             if (!user) {
@@ -131,20 +130,22 @@ const userController = {
 
             // auth from header
             const { authorization } = req.headers;
-
             const { user_id, first_name, last_name, telephone, email, birthday, gender } = req.body;
-            jwt.checkValidValue(res, authorization, user_id);
+
+            const result = jwt.checkValidValue(res, authorization, user_id);
+            if (!result) {
+                return;
+            }
 
             await connectDb();
             const user = await userModel.findOneAndUpdate({ user_id }, { first_name, last_name, telephone, email, birthday, gender }, { new: true });
 
             if (!user) {
                 const result = jsonFormat(false, "User not found", null);
-
                 return res.json(result);
             }
 
-            res.json(jwt.generateToken(jsonFormat(true, "User updated", user)));
+            res.json(jsonFormat(true, "User updated", user));
         } catch (err) {
             res.json(err);
         }
