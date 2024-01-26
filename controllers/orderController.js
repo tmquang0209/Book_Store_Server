@@ -103,6 +103,7 @@ const orderController = {
                     product_id: product.product_id,
                     name: product.name,
                     quantity: productOrder.quantity,
+                    price: productOrder.price,
                 };
             });
             const result = jsonFormat(true, "Get order successfully", { ...order._doc, products });
