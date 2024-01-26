@@ -96,12 +96,19 @@ const orderSchema = new mongoose.Schema({
                 time: { type: Date, required: true, default: Date.now() },
             },
         ],
+
         canceled: [
             {
                 description: { type: String, required: false },
                 time: { type: Date, required: true, default: Date.now() },
             },
         ],
+    },
+
+    shippingCost: {
+        type: Number,
+        required: true,
+        default: 0,
     },
 
     status: {
