@@ -90,12 +90,74 @@ const orderController = {
 
                 return res.json(result);
             }
-
-            const result = jsonFormat(true, "Get order successfully", order);
+            // get product name
+            const productsId = order.products.map((product) => product.product_id);
+            const productsDb = await productModel.find({ product_id: { $in: productsId } });
+            if (productsDb.length !== productsId.length) {
+                const result = jsonFormat(false, "Products not found", null);
+                return res.json(result);
+            }
+            const products = productsDb.map((product) => {
+                const productOrder = order.products.find((productOrder) => productOrder.product_id === product.product_id);
+                return {
+                    product_id: product.product_id,
+                    name: product.name,
+                    quantity: productOrder.quantity,
+                };
+            });
+            const result = jsonFormat(true, "Get order successfully", { ...order._doc, products });
 
             res.json(result);
         } catch (err) {
             res.json(err);
+        }
+    },
+
+    cancelOrder: async (req, res) => {
+        try {
+            const { order_id } = req.params;
+            const { authorization } = req.headers;
+
+            // check permission
+            const userInfo = jwt.decode(authorization);
+
+            if (userInfo.role !== "admin" && userInfo.role !== "user") {
+                const result = jsonFormat(false, "Permission denied", null);
+                return res.json(result);
+            }
+
+            await connectDb();
+
+            // check order_id
+            const order = await orderModel.findOne({ order_id });
+            if (!order) {
+                const result = jsonFormat(false, "Order not found", null);
+                return res.json(result);
+            }
+
+            // check user_id
+            if (userInfo.role === "user" && order.user_id !== userInfo.user_id) {
+                const result = jsonFormat(false, "Permission denied", null);
+                return res.json(result);
+            }
+
+            // check status
+            if (order.status !== "pending") {
+                const result = jsonFormat(false, "Order can't cancel", null);
+                return res.json(result);
+            }
+
+            // cancel order
+            const update = await orderModel.updateOne({ order_id }, { status: "cancel" });
+            if (!update) {
+                const result = jsonFormat(false, "Cancel order failed", null);
+                return res.json(result);
+            }
+
+            const result = jsonFormat(true, "Cancel order successfully", null);
+            res.json(result);
+        } catch (err) {
+            res.json(jsonFormat(false, err, null));
         }
     },
 

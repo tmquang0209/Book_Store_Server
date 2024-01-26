@@ -69,6 +69,41 @@ const orderSchema = new mongoose.Schema({
         default: "cash",
     },
 
+    deliveryTimeline: {
+        process: [
+            {
+                description: { type: String, required: false },
+                time: { type: Date, required: true, default: Date.now() },
+            },
+        ],
+        confirmed: [
+            {
+                description: { type: String, required: false },
+                time: { type: Date, required: true, default: Date.now() },
+            },
+        ],
+
+        shipping: [
+            {
+                description: { type: String, required: false },
+                time: { type: Date, required: true, default: Date.now() },
+            },
+        ],
+
+        delivered: [
+            {
+                description: { type: String, required: false },
+                time: { type: Date, required: true, default: Date.now() },
+            },
+        ],
+        canceled: [
+            {
+                description: { type: String, required: false },
+                time: { type: Date, required: true, default: Date.now() },
+            },
+        ],
+    },
+
     status: {
         type: String,
         required: true,

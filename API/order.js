@@ -5,6 +5,7 @@ const orderController = require("../controllers/orderController");
 
 orderRouter.get("/", orderController.getAllOrders);
 orderRouter.get("/:order_id/detail", validate.getOrder, orderController.getOrder);
+orderRouter.put("/:order_id/cancel", validate.getOrder, orderController.cancelOrder);
 orderRouter.get("/user/:user_id", orderController.getAllOrdersByUserId);
 orderRouter.post("/create", validate.createOrder, orderController.createOrder);
 // orderRouter.put("/update/:order_id", orderController.updateOrder);
