@@ -69,43 +69,29 @@ const orderSchema = new mongoose.Schema({
         default: "cash",
     },
 
-    deliveryTimeline: {
-        process: [
-            {
-                description: { type: String, required: false },
-                time: { type: Date, required: true, default: Date.now() },
+    shipping_log: [
+        {
+            status: {
+                type: String,
+                required: true,
+                default: orderStatus.PENDING,
             },
-        ],
-        confirmed: [
-            {
-                description: { type: String, required: false },
-                time: { type: Date, required: true, default: Date.now() },
+            description: {
+                type: String,
+                required: false,
             },
-        ],
+            time: {
+                type: Date,
+                default: Date.now(),
+            },
+            created_by: {
+                type: Number,
+                required: true,
+            },
+        },
+    ],
 
-        shipping: [
-            {
-                description: { type: String, required: false },
-                time: { type: Date, required: true, default: Date.now() },
-            },
-        ],
-
-        delivered: [
-            {
-                description: { type: String, required: false },
-                time: { type: Date, required: true, default: Date.now() },
-            },
-        ],
-
-        canceled: [
-            {
-                description: { type: String, required: false },
-                time: { type: Date, required: true, default: Date.now() },
-            },
-        ],
-    },
-
-    shippingCost: {
+    shipping_cost: {
         type: Number,
         required: true,
         default: 0,

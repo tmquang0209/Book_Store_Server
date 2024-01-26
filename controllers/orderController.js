@@ -6,6 +6,7 @@ const jwt = require("../Utils/jwtToken");
 const jsonFormat = require("../Utils/json");
 const { validationResult } = require("express-validator");
 const userModel = require("../models/user");
+const orderStatus = require("../Utils/constant");
 
 const orderController = {
     createOrder: async (req, res) => {
@@ -118,9 +119,10 @@ const orderController = {
         try {
             const { order_id } = req.params;
             const { authorization } = req.headers;
+            const { description } = req.body;
 
             // check permission
-            const userInfo = jwt.decode(authorization);
+            const userInfo = jwt.decode(authorization)._doc;
 
             if (userInfo.role !== "admin" && userInfo.role !== "user") {
                 const result = jsonFormat(false, "Permission denied", null);
@@ -143,21 +145,41 @@ const orderController = {
             }
 
             // check status
-            if (order.status !== "pending") {
+            if (order.status !== orderStatus.PENDING) {
                 const result = jsonFormat(false, "Order can't cancel", null);
                 return res.json(result);
             }
 
-            // cancel order
-            const update = await orderModel.updateOne({ order_id }, { status: "cancel" });
-            if (!update) {
+            if (!order) {
                 const result = jsonFormat(false, "Cancel order failed", null);
                 return res.json(result);
             }
 
+            order.status = orderStatus.CANCELED;
+            order.shipping_log = Array.isArray(order.shipping_log)
+                ? [
+                      ...order.shipping_log,
+                      {
+                          status: orderStatus.CANCELED,
+                          description,
+                          created_by: userInfo.user_id,
+                      },
+                  ]
+                : [
+                      {
+                          status: orderStatus.CANCELED,
+                          description,
+                          created_by: userInfo.user_id,
+                      },
+                  ];
+
+            // Save the updated order back to the database
+            await order.save();
+
             const result = jsonFormat(true, "Cancel order successfully", null);
             res.json(result);
         } catch (err) {
+            console.log(err);
             res.json(jsonFormat(false, err, null));
         }
     },
