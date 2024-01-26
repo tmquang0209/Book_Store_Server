@@ -4,6 +4,7 @@ const productModel = require("../models/product");
 const jwt = require("../Utils/jwtToken");
 const jsonFormat = require("../Utils/json");
 const { validationResult } = require("express-validator");
+const orderModel = require("../models/order");
 
 const productController = {
     getAllProducts: async (req, res) => {
@@ -232,6 +233,13 @@ const productController = {
             const product = await productModel.findOne({ product_id });
             if (!product) {
                 const result = jsonFormat(false, "Product not found", null);
+                return res.json(result);
+            }
+
+            //check product in order
+            const checkOrder = await orderModel.findOne({ "products.product_id": product_id });
+            if (checkOrder) {
+                const result = jsonFormat(false, "This product cannot be deleted because it exists in the order.", null);
                 return res.json(result);
             }
 

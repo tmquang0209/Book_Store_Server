@@ -54,7 +54,14 @@ const orderController = {
             }
 
             // create order
-            const order = await orderModel.create({ user_id, contact, address, products });
+            const shipping_log = [
+                {
+                    status: orderStatus.PENDING,
+                    description: "Create order",
+                    created_by: user_id,
+                },
+            ];
+            const order = await orderModel.create({ user_id, contact, address, products, shipping_log });
             if (!order) {
                 const result = jsonFormat(false, "Create order failed", null);
 
