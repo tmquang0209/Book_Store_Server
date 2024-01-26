@@ -3,6 +3,7 @@ const categoryModel = require("../models/category");
 const jwt = require("../Utils/jwtToken");
 const jsonFormat = require("../Utils/json");
 const { validationResult } = require("express-validator");
+const productModel = require("../models/product");
 
 const categoryController = {
     getAllCategories: async (req, res) => {
@@ -129,6 +130,13 @@ const categoryController = {
             const category = await categoryModel.findOneAndDelete({ category_id });
             if (!category) {
                 const result = jsonFormat(false, "Category not found", null);
+                return res.json(result);
+            }
+
+            // check category in product
+            const checkProduct = await productModel.findOne({ category_id });
+            if (checkProduct) {
+                const result = jsonFormat(false, "This category cannot be deleted because it exists in product", null);
                 return res.json(result);
             }
 
