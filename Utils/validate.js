@@ -38,6 +38,13 @@ const userValidate = {
     deleteUser: [check("user_id", "user_id is required").not().isEmpty(), check("user_id", "user_id must be a number").isNumeric()],
 
     updateStatusUser: [check("user_id", "user_id is required").not().isEmpty(), check("user_id", "user_id must be a number").isNumeric()],
+
+    updateAddress: [
+        check("address", "address is required").not().isEmpty(),
+        check("ward", "ward is required").not().isEmpty(),
+        check("district", "district is required").not().isEmpty(),
+        check("province", "province is required").not().isEmpty(),
+    ],
 };
 
 const categoryValidate = {

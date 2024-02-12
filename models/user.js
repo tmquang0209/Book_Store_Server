@@ -46,6 +46,25 @@ const userSchema = new mongoose.Schema({
         require: true,
     },
 
+    address: {
+        address: {
+            type: String,
+            require: false,
+        },
+        ward: {
+            type: String,
+            require: false,
+        },
+        district: {
+            type: String,
+            require: false,
+        },
+        province: {
+            type: String,
+            require: false,
+        },
+    },
+
     status: {
         type: Boolean,
         default: true,

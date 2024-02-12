@@ -4,6 +4,7 @@ const jwt = require("../Utils/jwtToken");
 const bcrypt = require("../Utils/bcrypt");
 const jsonFormat = require("../Utils/json");
 const { validationResult } = require("express-validator");
+const { json } = require("body-parser");
 
 const userController = {
     getUserByToken: async (req, res) => {
@@ -305,6 +306,43 @@ const userController = {
         } catch (err) {
             console.error(err);
             res.json(err);
+        }
+    },
+
+    updateAddress: async (req, res) => {
+        try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
+            const { authorization } = req.headers;
+            const { address, ward, district, province } = req.body;
+
+            if (!authorization) {
+                const result = jsonFormat(false, "You must provide access token", null);
+                return res.json(result);
+            }
+
+            const isLogged = jwt.checkLogin(res, authorization);
+
+            const decodeAuth = jwt.decode(authorization);
+
+            // update address to db
+            await connectDb();
+            const user = await userModel.findOneAndUpdate({ user_id: decodeAuth._doc.user_id }, { address: { address, ward, district, province } }, { new: true });
+
+            if (!user) {
+                const result = jsonFormat(false, "Can not update address", null);
+                res.json(result);
+            }
+
+            const result = jsonFormat(true, "Update address successful", user);
+            res.json(result);
+        } catch (err) {
+            console.error(err);
         }
     },
 };

@@ -13,5 +13,6 @@ userRouter.get("/updateStatus/:user_id", userController.updateStatus);
 userRouter.post("/login", validate.loginUser, userController.login);
 userRouter.post("/register", validate.registerUser, userController.signup);
 userRouter.post("/forgotPassword", validate.forgotPassword, userController.forgotPassword);
+userRouter.post("/updateAddress", validate.updateAddress, userController.updateAddress);
 
 module.exports = userRouter;
