@@ -125,21 +125,37 @@ const reviewController = {
             await connectDb();
             const orders = await orderModel.find({ order_id, user_id });
 
-            if (!orders) {
+            if (orders.length === 0 || !orders) {
                 return res.json(jsonFormat(false, "Order not found", null));
             }
 
-            const productsReview = orders.products.filter((item) => {
-                const product = productModel.findOne({ product_id: item.product_id });
-                if (!product) {
-                    return res.json(jsonFormat(false, "Product not found", null));
-                }
+            const productsReview = await Promise.all(
+                orders[0].products.map(async (item) => {
+                    const product = await productModel.findOne({ product_id: item.product_id });
 
-                const reviewed = product.reviews.find((review) => review.user_id === user_id);
-                if (!reviewed) return product;
-            });
+                    if (!product) {
+                        return null; // or handle the error in an appropriate way
+                    }
 
-            return res.json(jsonFormat(true, "Get products can review successfully", productsReview));
+                    const reviewed = product.reviews.findIndex((review) => review.user_id === user_id);
+
+                    if (reviewed === -1) {
+                        return {
+                            product_id: product.product_id,
+                            name: product.name,
+                            thumbnail: product.thumbnail,
+                            price: product.price,
+                            category: product.category,
+                        };
+                    }
+
+                    return null;
+                })
+            );
+
+            const filteredProducts = productsReview.filter((product) => product !== null);
+
+            return res.json(jsonFormat(true, "Get products can review successfully", filteredProducts || []));
         } catch (err) {
             console.log(err);
             return res.json(jsonFormat(false, "Error when get products can review", err));
