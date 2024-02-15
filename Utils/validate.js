@@ -112,12 +112,27 @@ const orderValidate = {
     getOrder: [check("order_id", "order_id is required").not().isEmpty(), check("order_id", "order_id must be a number").isNumeric()],
 };
 
+const reviewValidate = {
+    createReview: [
+        check("order_id", "order_id is required").not().isEmpty(),
+        check("order_id", "order_id must be a number").isNumeric(),
+        check("reviews", "reviews is required").not().isEmpty(),
+        check("reviews", "reviews must be an array").isArray(),
+        check("reviews.*.product_id", "product_id is required").not().isEmpty(),
+        check("reviews.*.product_id", "product_id must be a number").isNumeric(),
+        check("reviews.*.review", "review is required").not().isEmpty(),
+        check("reviews.*.rating", "rating is required").not().isEmpty(),
+        check("reviews.*.rating", "rating must be a number").isNumeric(),
+    ],
+};
+
 const validate = {
     ...userValidate,
     ...categoryValidate,
     ...productValidate,
     ...bannerValidate,
     ...orderValidate,
+    ...reviewValidate,
 };
 
 module.exports = validate;
