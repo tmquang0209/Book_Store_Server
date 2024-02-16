@@ -117,7 +117,7 @@ const reviewValidate = {
         check("order_id", "order_id is required").not().isEmpty(),
         check("order_id", "order_id must be a number").isNumeric(),
         check("reviews", "reviews is required").not().isEmpty(),
-        check("reviews", "reviews must be an array").isJSON(),
+        check("reviews", "reviews must be JSON").isJSON(),
         check("reviews.*.product_id", "product_id is required").not().isEmpty(),
         check("reviews.*.product_id", "product_id must be a number").isNumeric(),
         check("reviews.*.review", "review is required").not().isEmpty(),
