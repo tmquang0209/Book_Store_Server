@@ -131,6 +131,7 @@ const reviewController = {
                               name: user.first_name + " " + user.last_name,
                               review: item.review,
                               rating: item.rating,
+                              created_at: item.created_at,
                           };
                       })
                   )
