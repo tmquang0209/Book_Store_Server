@@ -174,6 +174,9 @@ const reviewController = {
             const { order_id, reviews } = req.body;
             const { authorization } = req.headers;
 
+            console.log("order_id", order_id);
+            console.log("reviews", typeof reviews, reviews);
+
             if (!authorization) {
                 return res.json(jsonFormat(false, "Authorization is required", null));
             }
@@ -201,9 +204,9 @@ const reviewController = {
                 return res.json(jsonFormat(false, "You can only review delivered order", null));
             }
 
-            reviews.foreach((item) => {
+            reviews.forEach(async (item) => {
                 // check if product_id is in order
-                const product = order.products.find((product) => product.product_id === item.product_id);
+                const product = await orderModel.findOne({ "products.product_id": item.product_id });
                 if (!product) {
                     return res.json(jsonFormat(false, "Product not found in order", null));
                 }
@@ -215,18 +218,25 @@ const reviewController = {
                 }
 
                 // check reviewed
-                const reviewed = productDetail.reviews.find((review) => review.user_id === user_id);
+                const reviewed = await productModel.findOne({ "reviews.user_id": user_id, product_id: item.product_id});
+                console.log("reviewed", reviewed);
                 if (!reviewed) {
-                    productDetail.reviews.push({
-                        user_id,
-                        review: item.review,
-                        rating: item.rating,
-                    });
-                    productDetail.save();
+                    await productModel.updateOne(
+                        { product_id: item.product_id },
+                        {
+                            $push: {
+                                reviews: {
+                                    user_id,
+                                    review: item.review,
+                                    rating: item.rating,
+                                },
+                            },
+                        }
+                    );
                 }
             });
 
-            return res.json(jsonFormat(true, "Review from user successfully", result));
+            return res.json(jsonFormat(true, "Review from user successfully", null));
         } catch (err) {
             console.log(err);
             return res.json(jsonFormat(false, "Error when review from user", err));
