@@ -249,7 +249,7 @@ const orderController = {
     updateStatus: async (req, res) => {
         try {
             const { order_id } = req.params;
-            const { status } = req.body;
+            const { status, description } = req.body;
             const { authorization } = req.headers;
 
             // check permission
@@ -273,7 +273,21 @@ const orderController = {
             }
 
             // update status
-            const update = await orderModel.updateOne({ order_id }, { status });
+            const update = await orderModel.updateOne(
+                { order_id },
+                {
+                    status,
+                    $push: {
+                        shipping_log: {
+                            status,
+                            description,
+                            created_by: jwt.decode(authorization)._doc.user_id,
+                        },
+                    },
+                }
+            );
+            
+            // order.shipping_log
             if (!update) {
                 const result = jsonFormat(false, "Update status failed", null);
                 return res.json(result);

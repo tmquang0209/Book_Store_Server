@@ -110,6 +110,14 @@ const orderValidate = {
         check("payment", "payment is required").not().isEmpty(),
     ],
     getOrder: [check("order_id", "order_id is required").not().isEmpty(), check("order_id", "order_id must be a number").isNumeric()],
+    cancelOrder: [check("order_id", "order_id is required").not().isEmpty(), check("order_id", "order_id must be a number").isNumeric()],
+    updateStatusOrder: [
+        check("order_id", "order_id is required").not().isEmpty(),
+        check("order_id", "order_id must be a number").isNumeric(),
+        check("status", "status is required").not().isEmpty(),
+        check("description", "description is required").not().isEmpty(),
+    ],
+    searchByName: [check("name", "name is required").not().isEmpty()],
 };
 
 const reviewValidate = {
