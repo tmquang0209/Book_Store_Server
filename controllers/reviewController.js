@@ -9,6 +9,7 @@ const jwt = require("../Utils/jwtToken");
 
 const connectDb = require("../models/database");
 const jsonFormat = require("../Utils/json");
+const userModel = require("../models/user");
 const orderModel = require("../models/order");
 const productModel = require("../models/product");
 const orderStatus = require("../Utils/constant");
@@ -96,6 +97,49 @@ const reviewController = {
         } catch (err) {
             console.log(err);
             return res.json(jsonFormat(false, "Error when get review", err));
+        }
+    },
+
+    getReviewByProductId: async (req, res) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
+            const { product_id } = req.params;
+
+            await connectDb();
+            const product = await productModel.findOne({ product_id });
+
+            if (!product) {
+                return res.json(jsonFormat(false, "Product not found", null));
+            }
+
+            // get user info in user schema => user_id, name, order date, review, rating
+            const reviews = product.reviews
+                ? await Promise.all(
+                      product.reviews.map(async (item) => {
+                          const user = await userModel.findOne({ user_id: item.user_id });
+                          if (!user) {
+                              return null; // or handle the error in an appropriate way
+                          }
+
+                          return {
+                              user_id: user.user_id,
+                              name: user.first_name + " " + user.last_name,
+                              review: item.review,
+                              rating: item.rating,
+                          };
+                      })
+                  )
+                : [];
+
+            return res.json(jsonFormat(true, "Get review by product id successfully", reviews));
+        } catch (err) {
+            console.log(err);
+            return res.json(jsonFormat(false, "Error when get review by product id", err));
         }
     },
 
@@ -218,7 +262,7 @@ const reviewController = {
                 }
 
                 // check reviewed
-                const reviewed = await productModel.findOne({ "reviews.user_id": user_id, product_id: item.product_id});
+                const reviewed = await productModel.findOne({ "reviews.user_id": user_id, product_id: item.product_id });
                 console.log("reviewed", reviewed);
                 if (!reviewed) {
                     await productModel.updateOne(
