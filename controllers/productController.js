@@ -9,15 +9,15 @@ const orderModel = require("../models/order");
 const productController = {
     getAllProducts: async (req, res) => {
         try {
-            const { keyword, category, sort, from, to, startItem, endItem } = req.query || req.params;
+            const { keyword, category, sort, from, to, startItem, limit } = req.query || req.params;
 
             await connectDb();
-            // limit product from startItem to endItem
+            // limit product by startItem and limit
             let products;
-            if (startItem === undefined || endItem === undefined) {
-                products = await productModel.find().sort({ createdAt: -1 });
+            if (startItem && limit) {
+                products = await productModel.find().skip(Number(startItem)).limit(Number(limit));
             } else {
-                products = await productModel.find().sort({ createdAt: -1 }).skip(Number(startItem)).limit(Number(endItem));
+                products = await productModel.find();
             }
 
             if (keyword) {
