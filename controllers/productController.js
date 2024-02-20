@@ -9,10 +9,16 @@ const orderModel = require("../models/order");
 const productController = {
     getAllProducts: async (req, res) => {
         try {
-            const { keyword, category, sort, from, to } = req.query || req.params;
+            const { keyword, category, sort, from, to, startItem, endItem } = req.query || req.params;
 
             await connectDb();
-            let products = await productModel.find();
+            // limit product from startItem to endItem
+            let products;
+            if (startItem === undefined || endItem === undefined) {
+                products = await productModel.find().sort({ createdAt: -1 });
+            } else {
+                products = await productModel.find().sort({ createdAt: -1 }).skip(Number(startItem)).limit(Number(endItem));
+            }
 
             if (keyword) {
                 products = products.filter((product) => product.name.toLowerCase().includes(keyword.toLowerCase()));
@@ -326,8 +332,7 @@ const productController = {
         console.log("get trending products");
         try {
             await connectDb();
-            const products = await productModel.find().limit(5);
-
+            const products = await productModel.find().sort({ "reviews.rating": -1 }).limit(5);
             const result = products.length === 0 ? jsonFormat(false, "No products found", null) : jsonFormat(true, "Products found", products);
 
             res.json(result);
