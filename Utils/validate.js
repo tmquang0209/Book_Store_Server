@@ -13,6 +13,21 @@ const userValidate = {
 
     forgotPassword: [check("username", "Username is required").not().isEmpty()],
 
+    verifyCode: [
+        check("username", "Username is required").not().isEmpty(),
+        check("verify_code", "Verify code is required").not().isEmpty(),
+        check("verify_code", "Verify code must be a number").isNumeric(),
+    ],
+
+    createNewPassword: [
+        check("username", "Username is required").not().isEmpty(),
+        check("new_password", "New password is required").not().isEmpty(),
+        check("confirm_password", "Confirm password is required").not().isEmpty(),
+        check("confirm_password", "Confirm password must be equal to new password").custom((value, { req }) => value === req.body.new_password),
+        check("verify_code", "Verify code is required").not().isEmpty(),
+        check("verify_code", "Verify code must be a number").isNumeric(),
+    ],
+
     userById: [check("user_id", "user_id is required").not().isEmpty(), check("user_id", "user_id must be a number").isNumeric()],
 
     createUser: [

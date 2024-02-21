@@ -4,7 +4,7 @@ const jwt = require("../Utils/jwtToken");
 const bcrypt = require("../Utils/bcrypt");
 const jsonFormat = require("../Utils/json");
 const { validationResult } = require("express-validator");
-const { json } = require("body-parser");
+const transporter = require("../Utils/mailConfig");
 
 const userController = {
     getUserByToken: async (req, res) => {
@@ -302,11 +302,94 @@ const userController = {
                 return res.json(result);
             }
 
-            const result = jsonFormat(true, "User found", user);
-            res.json(result);
+            // random verify code
+            const verifyCode = Math.floor(100000 + Math.random() * 900000);
+
+            // send mail
+            const mailOptions = {
+                from: "bookreadertlu3@gmail.com",
+                to: user.email,
+                subject: "Reset password",
+                text: `Your verify code is ${verifyCode}`,
+            };
+
+            transporter.sendMail(mailOptions, (err, info) => {
+                if (err) {
+                    console.error(err);
+                    return res.json(jsonFormat(false, "Send mail failed", null));
+                } else {
+                    console.log("Email sent: " + info.response);
+                    user.verify_code = verifyCode;
+                    user.save();
+                    // hidden character email
+                    const hiddenEmail = user.email.replace(/.{5}(?=@)/, "*****");
+
+                    return res.json(jsonFormat(true, `Send mail to ${hiddenEmail} successful`, { verifyCode, email: user.email }));
+                }
+            });
         } catch (err) {
             console.error(err);
             res.json(err);
+        }
+    },
+
+    verifyCode: async (req, res) => {
+        try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
+            await connectDb();
+            const { username, verify_code } = req.body;
+
+            const user = await userModel.findOne({ username });
+            if (!user) {
+                const result = jsonFormat(false, "Username not found", null);
+                return res.json(result);
+            }
+
+            if (user.verify_code !== verify_code) {
+                const result = jsonFormat(false, "Verify code incorrect", null);
+                return res.json(result);
+            }
+
+            const result = jsonFormat(true, "Verify code correct", null);
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.json(jsonFormat(false, "Verify code incorrect", err));
+        }
+    },
+
+    createNewPassword: async (req, res) => {
+        try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
+            await connectDb();
+            const { username, new_password, verify_code } = req.body;
+
+            const user = await userModel.findOne({ username, verify_code });
+            if (!user) {
+                const result = jsonFormat(false, "Username not found", null);
+                return res.json(result);
+            }
+
+            const hash = await bcrypt.hashPassword(new_password);
+            const updateUser = await userModel.findOneAndUpdate({ username }, { password: hash, verify_code: null }, { new: true });
+
+            const result = jsonFormat(true, "Change password success", updateUser);
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.json(jsonFormat(false, "Change password failed", err));
         }
     },
 

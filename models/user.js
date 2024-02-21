@@ -81,6 +81,11 @@ const userSchema = new mongoose.Schema({
         default: "user",
     },
 
+    verify_code: {
+        type: Number,
+        require: false,
+    },
+
     modified_at: {
         type: Date,
         default: Date.now(),
