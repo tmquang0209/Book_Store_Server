@@ -357,7 +357,7 @@ const userController = {
             }
 
             const { authorization } = req.headers;
-            const { oldPassword, newPassword } = req.body;
+            const { old_password, new_password } = req.body;
 
             if (!authorization) {
                 const result = jsonFormat(false, "You must provide access token", null);
@@ -376,13 +376,13 @@ const userController = {
                 return res.json(result);
             }
 
-            const checkPassword = await bcrypt.comparePassword(oldPassword, user.password);
+            const checkPassword = await bcrypt.comparePassword(old_password, user.password);
             if (!checkPassword) {
                 const result = jsonFormat(false, "Old password incorrect", null);
                 return res.json(result);
             }
 
-            const hash = await bcrypt.hashPassword(newPassword);
+            const hash = await bcrypt.hashPassword(new_password);
             const updateUser = await userModel.findOneAndUpdate({ user_id: decodeAuth._doc.user_id }, { password: hash }, { new: true });
 
             const result = jsonFormat(true, "Change password success", updateUser);
