@@ -118,14 +118,14 @@ const productController = {
     getSimilarProducts: async (req, res) => {
         try {
             const errors = validationResult(req);
-            if (errors.isEmpty()) {
+            if (!errors.isEmpty()) {
                 const result = jsonFormat(false, "Error", errors.array());
                 return res.json(result);
             }
 
             await connectDb();
             const { product_id } = req.params;
-            const product = await productModel.findOne({ product });
+            const product = await productModel.findOne({ product_id });
             const category = product.category_id;
             // random 10 products
             const products = await productModel.find({ category_id: category }).limit(10);
