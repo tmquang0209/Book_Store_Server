@@ -81,7 +81,7 @@ const productController = {
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
-                const result = jsonFormat(false, "Error", errors.array());
+                const result = jsonFormat(false, errors.array()[0].msg, null);
                 return res.json(result);
             }
 
@@ -119,7 +119,7 @@ const productController = {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                const result = jsonFormat(false, "Error", errors.array());
+                const result = jsonFormat(false, errors.array()[0].msg, null);
                 return res.json(result);
             }
 
@@ -145,7 +145,7 @@ const productController = {
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
-                const result = jsonFormat(false, "Error", errors.array());
+                const result = jsonFormat(false, errors.array()[0].msg, null);
                 return res.json(result);
             }
 
@@ -206,7 +206,7 @@ const productController = {
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
-                const result = jsonFormat(false, "Error", errors.array());
+                const result = jsonFormat(false, errors.array()[0].msg, null);
                 return res.json(result);
             }
 
@@ -248,7 +248,7 @@ const productController = {
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
-                const result = jsonFormat(false, "Error", errors.array());
+                const result = jsonFormat(false, errors.array()[0].msg, null);
                 return res.json(result);
             }
 
@@ -287,7 +287,7 @@ const productController = {
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
-                const result = jsonFormat(false, "Error", errors.array());
+                const result = jsonFormat(false, errors.array()[0].msg, null);
                 return res.json(result);
             }
 
@@ -322,7 +322,7 @@ const productController = {
             const errors = validationResult(req);
 
             if (!errors.isEmpty()) {
-                const result = jsonFormat(false, "Error", errors.array());
+                const result = jsonFormat(false, errors.array()[0].msg, null);
                 return res.json(result);
             }
 
