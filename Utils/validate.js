@@ -45,6 +45,12 @@ const userValidate = {
         check("district", "district is required").not().isEmpty(),
         check("province", "province is required").not().isEmpty(),
     ],
+
+    changePassword: [
+        check("old_password", "old_password is required").not().isEmpty(),
+        check("new_password", "new_password is required").not().isEmpty(),
+        check("confirm_password", "confirm_password is required").not().isEmpty(),
+    ],
 };
 
 const categoryValidate = {

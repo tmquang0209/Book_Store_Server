@@ -346,6 +346,51 @@ const userController = {
             console.error(err);
         }
     },
+
+    changePassword: async (req, res) => {
+        try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                const result = jsonFormat(false, errors.array()[0].msg, null);
+                return res.json(result);
+            }
+
+            const { authorization } = req.headers;
+            const { oldPassword, newPassword } = req.body;
+
+            if (!authorization) {
+                const result = jsonFormat(false, "You must provide access token", null);
+                return res.json(result);
+            }
+
+            const isLogged = jwt.checkLogin(res, authorization);
+
+            const decodeAuth = jwt.decode(authorization);
+
+            await connectDb();
+            const user = await userModel.findOne({ user_id: decodeAuth._doc.user_id });
+
+            if (!user) {
+                const result = jsonFormat(false, "User not found", null);
+                return res.json(result);
+            }
+
+            const checkPassword = await bcrypt.comparePassword(oldPassword, user.password);
+            if (!checkPassword) {
+                const result = jsonFormat(false, "Old password incorrect", null);
+                return res.json(result);
+            }
+
+            const hash = await bcrypt.hashPassword(newPassword);
+            const updateUser = await userModel.findOneAndUpdate({ user_id: decodeAuth._doc.user_id }, { password: hash }, { new: true });
+
+            const result = jsonFormat(true, "Change password success", updateUser);
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+        }
+    },
 };
 
 module.exports = userController;
