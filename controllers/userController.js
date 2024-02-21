@@ -63,10 +63,11 @@ const userController = {
 
             //check permission
             // if not admin or req.username != token
-            // jwt.checkPermission(res, authorization, "admin");
+            jwt.checkPermission(res, authorization, "admin");
 
             await connectDb();
             const { user_id } = req.params;
+            console.log(user_id);
             const user = await userModel.findOne({ user_id });
 
             const result = user ? jsonFormat(true, "User found", user) : jsonFormat(false, "User not found", null);

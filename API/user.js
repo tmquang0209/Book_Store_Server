@@ -5,7 +5,7 @@ const validate = require("../Utils/validate");
 
 userRouter.get("/getUserByToken", userController.getUserByToken);
 userRouter.get("/getAllUsers", userController.getAllUsers);
-userRouter.get("/getUserById/:id", userController.getUserById);
+userRouter.get("/getUserById/:user_id", userController.getUserById);
 userRouter.post("/createUser", userController.createUser);
 userRouter.put("/updateUserById", validate.updateUser, userController.updateUser);
 userRouter.delete("/deleteUserById", userController.deleteUser);
