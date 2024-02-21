@@ -12,5 +12,6 @@ productRouter.delete("/delete/:product_id", validate.deleteProduct, productContr
 productRouter.get("/updateStatus/:product_id", validate.updateProduct, productController.updateStatus);
 productRouter.get("/search/:name", validate.searchByName, productController.searchByName);
 productRouter.get("/searchByCategory/:category_id", productController.getProductByCategory);
+productRouter.get("/similarProducts/:product_id", validate.productById, productController.getSimilarProducts);
 
 module.exports = productRouter;

@@ -115,6 +115,30 @@ const productController = {
         }
     },
 
+    getSimilarProducts: async (req, res) => {
+        try {
+            const errors = validationResult(req);
+            if (errors.isEmpty()) {
+                const result = jsonFormat(false, "Error", errors.array());
+                return res.json(result);
+            }
+
+            await connectDb();
+            const { product_id } = req.params;
+            const product = await productModel.findOne({ product });
+            const category = product.category_id;
+            // random 10 products
+            const products = await productModel.find({ category_id: category }).limit(10);
+
+            const result = products.length === 0 ? jsonFormat(false, "No products found", null) : jsonFormat(true, "Products found", products);
+
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.json(jsonFormat(false, "Error", err));
+        }
+    },
+
     createProduct: async (req, res) => {
         console.log("Create product");
         try {
