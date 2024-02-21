@@ -377,7 +377,7 @@ const userController = {
             }
 
             const hashOldPassword = await bcrypt.hashPassword(old_password);
-            const checkPassword = await bcrypt.comparePassword(hashOldPassword, user.password);
+            const checkPassword = await bcrypt.comparePassword(old_password, user.password);
             if (!checkPassword) {
                 const result = jsonFormat(false, "Old password incorrect", null);
                 return res.json(result);
